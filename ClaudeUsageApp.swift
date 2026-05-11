@@ -2,9 +2,10 @@ import SwiftUI
 
 @main
 struct ClaudeUsageApp: App {
-    // Live data by default. The menu bar will show an error until you paste your
-    // Organization UUID and sessionKey in Settings (⌘,). Flip to `true` for a
-    // mock-data demo mode.
+    @NSApplicationDelegateAdaptor(AppDelegate.self) private var appDelegate
+
+    // Live data by default. Configure Org UUID and sessionKey via Settings (⌘,).
+    // The first-launch welcome tour walks new users through it.
     @StateObject private var viewModel = UsageViewModel(useMock: false)
 
     var body: some Scene {

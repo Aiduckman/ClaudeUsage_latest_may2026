@@ -75,6 +75,14 @@ struct SettingsView: View {
                     .font(.caption).foregroundColor(.secondary)
             }
 
+            Section("Help") {
+                Button("Show welcome tour") {
+                    (NSApp.delegate as? AppDelegate)?.showOnboarding()
+                }
+                Text("Walks you through where to find your Organization UUID and sessionKey.")
+                    .font(.caption).foregroundColor(.secondary)
+            }
+
             Section("Status") {
                 if let usage = viewModel.usage {
                     LabeledContent("Last updated") {
@@ -95,7 +103,7 @@ struct SettingsView: View {
         }
         .formStyle(.grouped)
         .padding()
-        .frame(minWidth: 540, minHeight: 600)
+        .frame(minWidth: 540, minHeight: 640)
         .onAppear {
             orgUUIDDraft = UserDefaults.standard.string(forKey: ClaudeUsageClient.orgUUIDDefaultsKey) ?? ""
             sessionKeyDraft = viewModel.sessionStore.sessionKey ?? ""

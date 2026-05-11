@@ -2,13 +2,14 @@
 
 <img src="docs/icon.png" width="128" align="right" />
 
-A macOS menu bar app that shows real-time [claude.ai](https://claude.ai) usage — the rolling 5-hour session window, the 7-day weekly window, and the Opus weekly window (if your plan has one).
+**Easy install with guide.** A macOS menu bar app that shows real-time [claude.ai](https://claude.ai) usage — the rolling 5-hour session window, the 7-day weekly window, and the Opus weekly window (if your plan has one).
 
 - Color-coded percentage right in the menu bar (blue under 70%, orange 70–90%, red above 90%)
 - Notifications at 80% and 95% per window (with hysteresis so they don't spam)
 - Optional Launch at Login
 - `sessionKey` stored in the macOS Keychain — never on disk
 - Polls every 60s, click the refresh button to force-update
+- **Built-in first-run welcome tour** that walks you through grabbing your Org UUID and sessionKey from DevTools
 
 The app talks to the same internal endpoint that `claude.ai/settings/usage` calls. **It's not a public Anthropic API** — it can change at any time without notice.
 
@@ -21,24 +22,29 @@ The app talks to the same internal endpoint that `claude.ai/settings/usage` call
 3. **Important** — because the app isn't signed with a paid Apple Developer ID, macOS will refuse to open it on first run. Two options:
    - **Easiest**: in Terminal, run `xattr -dr com.apple.quarantine /Applications/ClaudeUsage.app` then open it normally.
    - **Or**: right-click the app → **Open** → click **Open** in the dialog (this is a one-time permission).
-4. Click the brain icon that appears in your menu bar → **Settings…** → paste your **Organization UUID** and **sessionKey** (see below) → Save.
+4. On first launch, a **Welcome to ClaudeUsage** window appears with a 3-step tour showing you exactly where to find your Organization UUID and sessionKey in your browser's DevTools.
+5. After the tour, click the brain icon in your menu bar → **Settings…** → paste both values → Save. (Lost the tour? It's also under Settings → Help → "Show welcome tour".)
 
-That's it. Numbers should populate within 60s. Click refresh to force.
+That's it. Numbers should populate within 60s. Click the refresh icon in the dropdown to force.
 
-### How to find your Organization UUID & sessionKey
+---
 
-Sign into <https://claude.ai> in your browser. Open DevTools (`⌥⌘I`).
+## How to find your Organization UUID & sessionKey
 
-**Organization UUID** (visible to your account, stable):
+If you want the gist without the tour:
+
+Sign into <https://claude.ai>. Open DevTools (`⌥⌘I`).
+
+**Organization UUID** — visible to your account, stable, not secret:
 1. **Network** tab → filter Fetch/XHR.
 2. Click **Settings → Usage** in claude.ai.
 3. Find a request to `https://claude.ai/api/organizations/<UUID>/usage`.
 4. Copy `<UUID>`.
 
-**sessionKey** (the secret — treat like a password):
+**sessionKey** — treat like a password:
 1. **Application** tab → **Storage → Cookies → https://claude.ai**.
 2. Copy the **Value** of the `sessionKey` row (a long string starting with `sk-ant-sid01-...`).
-3. The sessionKey eventually expires — if the app starts saying "Not signed in", grab a fresh one and paste again.
+3. The sessionKey eventually expires — if the app says "Not signed in", grab a fresh one and paste again.
 
 ---
 
@@ -85,6 +91,8 @@ ClaudeUsage/
 ├── make_icon.py               # icon generator (Python + Pillow)
 ├── AppIcon.icns               # bundled app icon
 ├── ClaudeUsageApp.swift       # @main entry
+├── AppDelegate.swift          # first-launch onboarding trigger
+├── OnboardingView.swift       # 3-step welcome tour with native illustrations
 ├── MenuBarLabelView.swift     # the percentage shown in the menu bar
 ├── MenuBarContentView.swift   # dropdown content
 ├── SettingsView.swift         # ⌘, settings window (org UUID, sessionKey, etc.)
@@ -98,7 +106,7 @@ ClaudeUsage/
 
 ## Troubleshooting
 
-- **"Organization UUID not set"** — open Settings and paste it.
+- **"Organization UUID not set"** — open Settings and paste it (or replay the welcome tour from Settings → Help).
 - **"Not signed in"** — paste your sessionKey in Settings (it may have expired).
 - **Keychain prompts on every launch** — the app is ad-hoc signed, so its identity changes on every rebuild. Click **Always Allow** each time.
 - **"App is damaged and can't be opened"** — quarantine flag from the download. Run `xattr -dr com.apple.quarantine /Applications/ClaudeUsage.app`.
