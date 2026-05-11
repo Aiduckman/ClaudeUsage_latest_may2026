@@ -10,6 +10,13 @@ DerivedData/
 ClaudeUsage.app/
 AppIcon.iconset/
 
+# Release archives (publish via GitHub Releases, not committed)
+*.zip
+*.dmg
+
+# Release scratch
+.release-notes.md
+
 # macOS
 .DS_Store
 *.swp
