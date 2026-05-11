@@ -5,12 +5,17 @@ struct SettingsView: View {
     @StateObject private var notificationManager = NotificationManager.shared
     @StateObject private var launchAtLogin = LaunchAtLogin.shared
 
+    @State private var orgUUIDDraft: String = ""
     @State private var sessionKeyDraft: String = ""
     @State private var showSavedConfirmation = false
 
     var body: some View {
         Form {
             Section("Authentication") {
+                TextField("Organization UUID", text: $orgUUIDDraft)
+                    .textFieldStyle(.roundedBorder)
+                    .font(.body.monospaced())
+
                 SecureField("sessionKey", text: $sessionKeyDraft)
                     .textFieldStyle(.roundedBorder)
 
@@ -20,16 +25,20 @@ struct SettingsView: View {
 
                 HStack {
                     Button("Save") {
-                        let trimmed = sessionKeyDraft.trimmingCharacters(in: .whitespacesAndNewlines)
-                        viewModel.sessionStore.sessionKey = trimmed.isEmpty ? nil : trimmed
+                        let orgTrimmed = orgUUIDDraft.trimmingCharacters(in: .whitespacesAndNewlines)
+                        let keyTrimmed = sessionKeyDraft.trimmingCharacters(in: .whitespacesAndNewlines)
+                        UserDefaults.standard.set(orgTrimmed, forKey: ClaudeUsageClient.orgUUIDDefaultsKey)
+                        viewModel.sessionStore.sessionKey = keyTrimmed.isEmpty ? nil : keyTrimmed
                         showSavedConfirmation = true
                         Task { await viewModel.refresh() }
                     }
                     .keyboardShortcut(.defaultAction)
-                    .disabled(sessionKeyDraft.isEmpty)
+                    .disabled(orgUUIDDraft.isEmpty && sessionKeyDraft.isEmpty)
 
                     Button("Clear") {
+                        orgUUIDDraft = ""
                         sessionKeyDraft = ""
+                        UserDefaults.standard.removeObject(forKey: ClaudeUsageClient.orgUUIDDefaultsKey)
                         viewModel.sessionStore.sessionKey = nil
                     }
 
@@ -86,8 +95,9 @@ struct SettingsView: View {
         }
         .formStyle(.grouped)
         .padding()
-        .frame(minWidth: 540, minHeight: 560)
+        .frame(minWidth: 540, minHeight: 600)
         .onAppear {
+            orgUUIDDraft = UserDefaults.standard.string(forKey: ClaudeUsageClient.orgUUIDDefaultsKey) ?? ""
             sessionKeyDraft = viewModel.sessionStore.sessionKey ?? ""
             Task { await notificationManager.refreshAuthorizationStatus() }
         }
@@ -102,10 +112,14 @@ struct SettingsView: View {
 
     private var authInstructions: String {
         """
-        Paste your claude.ai sessionKey cookie. \
-        To grab it: claude.ai signed in → DevTools (⌥⌘I) → \
-        Application → Cookies → claude.ai → copy the Value of `sessionKey`. \
-        Stored in macOS Keychain.
+        Sign into claude.ai, open DevTools (⌥⌘I).
+
+        • Organization UUID: Network tab → click Settings → Usage → find a request to \
+        /api/organizations/<UUID>/usage → copy the UUID.
+
+        • sessionKey: Application → Cookies → claude.ai → copy the Value of `sessionKey`.
+
+        Both are stored locally (UUID in app preferences, sessionKey in macOS Keychain).
         """
     }
 }

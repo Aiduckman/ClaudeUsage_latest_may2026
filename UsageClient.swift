@@ -6,18 +6,18 @@ protocol UsageFetching {
 
 enum UsageError: LocalizedError {
     case notAuthenticated
+    case missingOrgUUID
     case invalidResponse
     case httpStatus(Int)
     case decoding(Error)
-    case missingOrgUUID
 
     var errorDescription: String? {
         switch self {
         case .notAuthenticated: return "Not signed in. Paste your sessionKey in Settings."
+        case .missingOrgUUID:   return "Organization UUID not set. Open Settings to add it."
         case .invalidResponse:  return "Unexpected response from Claude."
         case .httpStatus(let c): return "Claude returned HTTP \(c)."
         case .decoding(let e):  return "Couldn't parse response: \(e.localizedDescription)"
-        case .missingOrgUUID:   return "Org UUID not set. Edit UsageClient.swift — see README."
         }
     }
 }
@@ -25,20 +25,18 @@ enum UsageError: LocalizedError {
 final class ClaudeUsageClient: UsageFetching {
     private let sessionStore: SessionStore
 
-    // ⚠️ REPLACE with your own claude.ai organization UUID.
-    //
-    // How to find it (one-time):
-    //   1. Sign into https://claude.ai in your browser.
-    //   2. Open DevTools (⌥⌘I) → Network tab → filter Fetch/XHR.
-    //   3. Click Settings → Usage in claude.ai.
-    //   4. Look for a request to:
-    //        https://claude.ai/api/organizations/<UUID>/usage
-    //   5. Copy the <UUID> into the line below, then rebuild.
-    private static let orgUUID = "YOUR_ORG_UUID"
+    /// Key for the org UUID stored in UserDefaults. The user enters it in Settings.
+    static let orgUUIDDefaultsKey = "claudeusage.orgUUID"
+
+    private var orgUUID: String? {
+        let value = (UserDefaults.standard.string(forKey: Self.orgUUIDDefaultsKey) ?? "")
+            .trimmingCharacters(in: .whitespacesAndNewlines)
+        return value.isEmpty ? nil : value
+    }
 
     private var endpoint: URL? {
-        guard Self.orgUUID != "YOUR_ORG_UUID", !Self.orgUUID.isEmpty else { return nil }
-        return URL(string: "https://claude.ai/api/organizations/\(Self.orgUUID)/usage")
+        guard let uuid = orgUUID else { return nil }
+        return URL(string: "https://claude.ai/api/organizations/\(uuid)/usage")
     }
 
     init(sessionStore: SessionStore) {
@@ -155,7 +153,7 @@ private extension JSONDecoder {
     }()
 }
 
-// Mock client used during development before endpoint discovery.
+// Mock client used during development. To enable: ClaudeUsageApp.swift → useMock: true
 final class MockUsageClient: UsageFetching {
     private var tick = 0
     func fetchUsage() async throws -> UsageData {

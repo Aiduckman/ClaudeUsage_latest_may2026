@@ -17,8 +17,8 @@ targets:
       path: Generated/Info.plist
       properties:
         LSUIElement: true
-        CFBundleShortVersionString: "0.1.0"
-        CFBundleVersion: "1"
+        CFBundleShortVersionString: "0.2.0"
+        CFBundleVersion: "2"
         NSHumanReadableCopyright: "Personal use"
         LSMinimumSystemVersion: "14.0"
         CFBundleIconFile: AppIcon
@@ -27,8 +27,8 @@ targets:
         # Change this (and the matching service in SessionStore.swift) to a
         # bundle ID you own, e.g. com.yourname.claudeusage.
         PRODUCT_BUNDLE_IDENTIFIER: com.example.claudeusage
-        MARKETING_VERSION: "0.1.0"
-        CURRENT_PROJECT_VERSION: "1"
+        MARKETING_VERSION: "0.2.0"
+        CURRENT_PROJECT_VERSION: "2"
         SWIFT_VERSION: "5.0"
         ENABLE_HARDENED_RUNTIME: NO
         CODE_SIGN_STYLE: Automatic

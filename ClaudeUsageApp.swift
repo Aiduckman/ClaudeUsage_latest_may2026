@@ -2,10 +2,10 @@ import SwiftUI
 
 @main
 struct ClaudeUsageApp: App {
-    // Defaults to mock data so the menu bar populates immediately on first launch.
-    // After you fill in your org UUID (UsageClient.swift) and your sessionKey
-    // (Settings → Authentication), flip this to `false` and rebuild.
-    @StateObject private var viewModel = UsageViewModel(useMock: true)
+    // Live data by default. The menu bar will show an error until you paste your
+    // Organization UUID and sessionKey in Settings (⌘,). Flip to `true` for a
+    // mock-data demo mode.
+    @StateObject private var viewModel = UsageViewModel(useMock: false)
 
     var body: some Scene {
         MenuBarExtra {
