@@ -1,0 +1,24 @@
+# Xcode / XcodeGen build artifacts
+ClaudeUsage.xcodeproj/
+build/
+Generated/
+DerivedData/
+*.xcuserstate
+*.xcworkspace/
+
+# Built app + intermediate iconset
+ClaudeUsage.app/
+AppIcon.iconset/
+
+# macOS
+.DS_Store
+*.swp
+*.swo
+
+# Python (icon generator caches)
+__pycache__/
+*.pyc
+
+# Local-only configuration (never commit a real org UUID or sessionKey)
+Local.swift
+.env
