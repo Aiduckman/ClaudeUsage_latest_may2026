@@ -89,10 +89,6 @@ Then configure via Settings (or wait for the welcome tour on first launch).
 - **Icon**: edit `make_icon.py` (Python + Pillow) and rebuild via the snippet in the [build script](build.sh).
 - **Re-render the tour screenshots**: run `ClaudeUsage.app/Contents/MacOS/ClaudeUsage --capture-onboarding=docs/onboarding/`. This uses SwiftUI's `ImageRenderer` to render each page directly to PNG — no system permissions required.
 
-## Leak check
-
-Before pushing, run `./scripts/check-leaks.sh` to scan source + (optionally) the built binary for personal data. See [scripts/.leak-patterns.example](scripts/.leak-patterns.example) for the template. A GitHub Actions workflow runs the same check on every push.
-
 ## Project layout
 
 ```
