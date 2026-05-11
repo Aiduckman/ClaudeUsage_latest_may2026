@@ -124,7 +124,7 @@ private struct OrgUUIDPage: View {
             HStack(spacing: 6) {
                 Image(systemName: "arrow.right.circle.fill")
                     .foregroundColor(.orange)
-                Text("Copy the UUID between `organizations/` and `/usage` — a long hex string like `6fe01348-…-898cd8ad55f3`.")
+                Text("Copy the UUID between `organizations/` and `/usage` — a long hex string like `a1b2c3d4-…-ef0123456789`.")
                     .font(.callout)
                     .foregroundColor(.secondary)
                     .fixedSize(horizontal: false, vertical: true)
@@ -176,7 +176,7 @@ private struct SessionKeyPage: View {
                     Divider()
                     cookieRow(name: "intercom-session", value: "abc123…", highlight: false)
                     Divider()
-                    cookieRow(name: "lastActiveOrganization", value: "6fe01348-…", highlight: false)
+                    cookieRow(name: "lastActiveOrganization", value: "a1b2c3d4-…", highlight: false)
                 }
             }
             .frame(height: 220)
@@ -272,7 +272,7 @@ private struct FinishPage: View {
                 Text("Authentication").font(.headline).foregroundColor(.primary)
 
                 mockField(label: "Organization UUID",
-                          value: "6fe01348-92af-466b-9234-…",
+                          value: "a1b2c3d4-e5f6-7890-abcd-…",
                           secure: false)
                 mockField(label: "sessionKey",
                           value: String(repeating: "•", count: 32),
