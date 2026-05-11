@@ -1,0 +1,35 @@
+# .leak-patterns — copy this file to ../.leak-patterns and edit.
+#
+# One regex per line. Lines starting with # are comments. Blank lines OK.
+# These patterns are personal/sensitive — the file containing them is
+# gitignored. Never commit a populated .leak-patterns.
+#
+# The check-leaks.sh script will fail if ANY of these patterns appear in
+# committed source files. With --binary it also scans the built .app.
+
+# === Your real claude.ai organization UUID ===
+# Paste yours below (literal hex, no angle brackets):
+# <your UUID here>
+
+# === Your email addresses ===
+# yourname@gmail\.com
+# yourname@company\.com
+
+# === Personal bundle ID prefix ===
+# (anything in source mentioning your name as bundle ID)
+# com\.yourhandle\.
+
+# === Any literal sessionKey you've used ===
+# sk-ant-sid01-xxxxxxxxxxxxxxxx
+
+# === GitHub or other API tokens (keep these patterns even if you don't
+#     think you've ever pasted one — caught early is caught best) ===
+# gho_[A-Za-z0-9]{36,}
+# ghp_[A-Za-z0-9]{36,}
+
+# === Personal hostnames, IPs, or paths that shouldn't ship ===
+# myhost\.local
+# /Users/yourname/
+
+# Pro tip: when in doubt, add the pattern. False positives are cheap;
+# leaks are forever.

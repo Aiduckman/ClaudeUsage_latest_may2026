@@ -3,6 +3,10 @@ import AppKit
 
 struct OnboardingView: View {
     let onComplete: () -> Void
+    init(initialPage: Int = 0, onComplete: @escaping () -> Void) {
+        self.onComplete = onComplete
+        self._page = State(initialValue: min(max(initialPage, 0), 3))
+    }
     @State private var page = 0
     private let pageCount = 4
 
@@ -30,7 +34,8 @@ struct OnboardingView: View {
     private var footer: some View {
         HStack {
             Button("Skip") { onComplete() }
-                .buttonStyle(.borderless)
+                .buttonStyle(.plain)
+                .foregroundColor(.secondary)
                 .opacity(page < pageCount - 1 ? 1 : 0)
                 .disabled(page >= pageCount - 1)
 
@@ -63,7 +68,7 @@ struct OnboardingView: View {
         }
         .padding(.horizontal, 24)
         .padding(.vertical, 16)
-        .background(Color(NSColor.windowBackgroundColor).opacity(0.6))
+        .background(.bar)
     }
 }
 
@@ -78,6 +83,7 @@ private struct WelcomePage: View {
                     .resizable()
                     .interpolation(.high)
                     .frame(width: 144, height: 144)
+                    .shadow(color: .black.opacity(0.2), radius: 16, y: 6)
             } else {
                 Image(systemName: "brain.head.profile")
                     .font(.system(size: 96, weight: .light))
@@ -111,10 +117,10 @@ private struct OrgUUIDPage: View {
                 .fixedSize(horizontal: false, vertical: true)
 
             DevToolsMock(tab: "Network") {
-                VStack(alignment: .leading, spacing: 6) {
+                VStack(alignment: .leading, spacing: 4) {
                     requestRow("kyc_status", highlight: false)
                     requestRow("overage_credit_grant", highlight: false)
-                    requestRow("organizations/<UUID>/usage", highlight: true)
+                    requestRow("organizations/<your UUID here>/usage", highlight: true)
                     requestRow("payment_method", highlight: false)
                     requestRow("prepaid/credits", highlight: false)
                 }
@@ -124,7 +130,7 @@ private struct OrgUUIDPage: View {
             HStack(spacing: 6) {
                 Image(systemName: "arrow.right.circle.fill")
                     .foregroundColor(.orange)
-                Text("Copy the UUID between `organizations/` and `/usage` — a long hex string like `a1b2c3d4-…-ef0123456789`.")
+                Text("Copy the UUID between `organizations/` and `/usage` — a long hex string with five dash-separated groups.")
                     .font(.callout)
                     .foregroundColor(.secondary)
                     .fixedSize(horizontal: false, vertical: true)
@@ -148,10 +154,10 @@ private struct OrgUUIDPage: View {
         }
         .padding(.horizontal, 10)
         .padding(.vertical, 6)
-        .background(highlight ? Color.yellow.opacity(0.35) : Color.clear)
+        .background(highlight ? Color.orange.opacity(0.18) : Color.clear)
         .overlay(
-            RoundedRectangle(cornerRadius: 4)
-                .stroke(highlight ? Color.orange : Color.clear, lineWidth: 2)
+            RoundedRectangle(cornerRadius: 6)
+                .stroke(highlight ? Color.orange : Color.clear, lineWidth: 1.5)
         )
     }
 }
@@ -169,14 +175,14 @@ private struct SessionKeyPage: View {
             DevToolsMock(tab: "Application") {
                 VStack(spacing: 0) {
                     cookieHeader
-                    Divider()
+                    Divider().opacity(0.4)
                     cookieRow(name: "_ga", value: "GA1.2.123456…", highlight: false)
-                    Divider()
+                    Divider().opacity(0.4)
                     cookieRow(name: "sessionKey", value: "sk-ant-sid01-XXXXX…", highlight: true)
-                    Divider()
+                    Divider().opacity(0.4)
                     cookieRow(name: "intercom-session", value: "abc123…", highlight: false)
-                    Divider()
-                    cookieRow(name: "lastActiveOrganization", value: "a1b2c3d4-…", highlight: false)
+                    Divider().opacity(0.4)
+                    cookieRow(name: "lastActiveOrganization", value: "<your UUID here>", highlight: false)
                 }
             }
             .frame(height: 220)
@@ -201,8 +207,8 @@ private struct SessionKeyPage: View {
             Spacer()
         }
         .padding(.horizontal, 10)
-        .padding(.vertical, 6)
-        .background(Color(white: 0.95))
+        .padding(.vertical, 8)
+        .background(.quaternary.opacity(0.6))
     }
 
     private func cookieRow(name: String, value: String, highlight: Bool) -> some View {
@@ -215,10 +221,10 @@ private struct SessionKeyPage: View {
                 .foregroundColor(highlight ? .primary : .secondary)
                 .padding(.horizontal, 6)
                 .padding(.vertical, 2)
-                .background(highlight ? Color.yellow.opacity(0.35) : Color.clear)
+                .background(highlight ? Color.orange.opacity(0.18) : Color.clear)
                 .overlay(
                     RoundedRectangle(cornerRadius: 4)
-                        .stroke(highlight ? Color.orange : Color.clear, lineWidth: 2)
+                        .stroke(highlight ? Color.orange : Color.clear, lineWidth: 1.5)
                 )
             Spacer()
         }
@@ -256,23 +262,13 @@ private struct FinishPage: View {
 
     private var settingsMock: some View {
         VStack(spacing: 0) {
-            HStack(spacing: 8) {
-                Circle().fill(Color.red).frame(width: 11, height: 11)
-                Circle().fill(Color.yellow).frame(width: 11, height: 11)
-                Circle().fill(Color.green).frame(width: 11, height: 11)
-                Spacer()
-                Text("ClaudeUsage Settings").font(.caption).foregroundColor(.secondary)
-                Spacer()
-            }
-            .padding(.horizontal, 10)
-            .padding(.vertical, 8)
-            .background(Color(white: 0.93))
+            WindowChrome(title: "ClaudeUsage Settings")
 
             VStack(alignment: .leading, spacing: 12) {
                 Text("Authentication").font(.headline).foregroundColor(.primary)
 
                 mockField(label: "Organization UUID",
-                          value: "a1b2c3d4-e5f6-7890-abcd-…",
+                          value: "<your UUID here>",
                           secure: false)
                 mockField(label: "sessionKey",
                           value: String(repeating: "•", count: 32),
@@ -293,8 +289,8 @@ private struct FinishPage: View {
             .background(Color(NSColor.textBackgroundColor))
         }
         .clipShape(RoundedRectangle(cornerRadius: 10))
-        .overlay(RoundedRectangle(cornerRadius: 10).stroke(Color.gray.opacity(0.3)))
-        .shadow(color: .black.opacity(0.15), radius: 12, y: 4)
+        .overlay(RoundedRectangle(cornerRadius: 10).strokeBorder(.separator.opacity(0.6)))
+        .shadow(color: .black.opacity(0.18), radius: 14, y: 4)
     }
 
     private func mockField(label: String, value: String, secure: Bool) -> some View {
@@ -309,7 +305,7 @@ private struct FinishPage: View {
             .padding(.horizontal, 8)
             .padding(.vertical, 6)
             .background(Color(NSColor.controlBackgroundColor))
-            .overlay(RoundedRectangle(cornerRadius: 5).stroke(Color.accentColor, lineWidth: 2))
+            .overlay(RoundedRectangle(cornerRadius: 5).strokeBorder(Color.accentColor, lineWidth: 2))
             .cornerRadius(5)
         }
     }
@@ -328,7 +324,34 @@ private func stepHeader(_ step: String, title: String) -> some View {
     }
 }
 
-/// Stylized "browser DevTools" frame.
+/// Stylized window chrome bar with traffic lights — adapts to light/dark.
+private struct WindowChrome: View {
+    let title: String
+
+    var body: some View {
+        ZStack {
+            // True macOS traffic-light colors, slightly soft
+            HStack(spacing: 8) {
+                Circle().fill(Color(red: 1.00, green: 0.37, blue: 0.36)).frame(width: 11, height: 11)
+                Circle().fill(Color(red: 1.00, green: 0.74, blue: 0.18)).frame(width: 11, height: 11)
+                Circle().fill(Color(red: 0.16, green: 0.79, blue: 0.31)).frame(width: 11, height: 11)
+                Spacer()
+            }
+            .padding(.leading, 10)
+
+            Text(title)
+                .font(.caption)
+                .foregroundColor(.secondary)
+        }
+        .frame(height: 28)
+        .background(.bar)            // semantic material — auto-adapts
+        .overlay(alignment: .bottom) {
+            Rectangle().fill(.separator.opacity(0.6)).frame(height: 0.5)
+        }
+    }
+}
+
+/// Stylized "browser DevTools" frame, fully dark-mode aware.
 private struct DevToolsMock<Content: View>: View {
     let tab: String
     @ViewBuilder let content: Content
@@ -337,30 +360,17 @@ private struct DevToolsMock<Content: View>: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
-            // Window chrome
-            HStack(spacing: 8) {
-                Circle().fill(Color.red).frame(width: 11, height: 11)
-                Circle().fill(Color.yellow).frame(width: 11, height: 11)
-                Circle().fill(Color.green).frame(width: 11, height: 11)
-                Spacer()
-                Text("DevTools — claude.ai")
-                    .font(.caption).foregroundColor(.secondary)
-                Spacer()
-                Spacer().frame(width: 36)
-            }
-            .padding(.horizontal, 10)
-            .padding(.vertical, 8)
-            .background(Color(white: 0.93))
+            WindowChrome(title: "DevTools — claude.ai")
 
-            // Tab strip
-            HStack(spacing: 4) {
+            // Tab strip — uses bar material for native chrome feel.
+            HStack(spacing: 0) {
                 ForEach(tabs, id: \.self) { name in
                     VStack(spacing: 4) {
                         Text(name)
                             .font(.caption)
                             .foregroundColor(name == tab ? .primary : .secondary)
-                            .padding(.horizontal, 10)
-                            .padding(.top, 6)
+                            .padding(.horizontal, 12)
+                            .padding(.top, 7)
                         Rectangle()
                             .fill(name == tab ? Color.accentColor : Color.clear)
                             .frame(height: 2)
@@ -368,10 +378,10 @@ private struct DevToolsMock<Content: View>: View {
                 }
                 Spacer()
             }
-            .padding(.horizontal, 8)
-            .background(Color(white: 0.97))
-
-            Divider()
+            .background(.bar)
+            .overlay(alignment: .bottom) {
+                Rectangle().fill(.separator.opacity(0.6)).frame(height: 0.5)
+            }
 
             content
                 .padding(10)
@@ -379,7 +389,7 @@ private struct DevToolsMock<Content: View>: View {
                 .background(Color(NSColor.textBackgroundColor))
         }
         .clipShape(RoundedRectangle(cornerRadius: 10))
-        .overlay(RoundedRectangle(cornerRadius: 10).stroke(Color.gray.opacity(0.3)))
-        .shadow(color: .black.opacity(0.1), radius: 8, y: 2)
+        .overlay(RoundedRectangle(cornerRadius: 10).strokeBorder(.separator.opacity(0.6)))
+        .shadow(color: .black.opacity(0.18), radius: 10, y: 3)
     }
 }

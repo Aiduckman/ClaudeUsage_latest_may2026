@@ -17,6 +17,9 @@ AppIcon.iconset/
 # Release scratch
 .release-notes.md
 
+# Personal leak-check patterns — NEVER commit these
+.leak-patterns
+
 # macOS
 .DS_Store
 *.swp

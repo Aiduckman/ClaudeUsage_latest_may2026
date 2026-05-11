@@ -9,9 +9,26 @@
 - Optional Launch at Login
 - `sessionKey` stored in the macOS Keychain — never on disk
 - Polls every 60s, click the refresh button to force-update
-- **Built-in first-run welcome tour** that walks you through grabbing your Org UUID and sessionKey from DevTools
+- **Built-in first-run welcome tour** that walks you through setup in under a minute
 
 The app talks to the same internal endpoint that `claude.ai/settings/usage` calls. **It's not a public Anthropic API** — it can change at any time without notice.
+
+---
+
+## The first-launch tour
+
+When you open the app for the first time, a 3-step welcome window walks you through exactly what to copy from your browser. You can re-open it anytime from Settings → Help → "Show welcome tour".
+
+<table>
+  <tr>
+    <td align="center" width="50%"><b>Welcome</b><br><img src="docs/onboarding/page0.png" /></td>
+    <td align="center" width="50%"><b>Step 1 — Organization UUID</b><br><img src="docs/onboarding/page1.png" /></td>
+  </tr>
+  <tr>
+    <td align="center" width="50%"><b>Step 2 — sessionKey</b><br><img src="docs/onboarding/page2.png" /></td>
+    <td align="center" width="50%"><b>Step 3 — Paste into Settings</b><br><img src="docs/onboarding/page3.png" /></td>
+  </tr>
+</table>
 
 ---
 
@@ -19,19 +36,18 @@ The app talks to the same internal endpoint that `claude.ai/settings/usage` call
 
 1. Grab the latest `ClaudeUsage.zip` from [Releases](https://github.com/Aiduckman/ClaudeUsage_latest_may2026/releases/latest).
 2. Unzip → drag `ClaudeUsage.app` into `/Applications`.
-3. **Important** — because the app isn't signed with a paid Apple Developer ID, macOS will refuse to open it on first run. Two options:
+3. **Quarantine bypass** — because the app isn't signed with a paid Apple Developer ID, macOS will refuse to open it on first run. Two options:
    - **Easiest**: in Terminal, run `xattr -dr com.apple.quarantine /Applications/ClaudeUsage.app` then open it normally.
-   - **Or**: right-click the app → **Open** → click **Open** in the dialog (this is a one-time permission).
-4. On first launch, a **Welcome to ClaudeUsage** window appears with a 3-step tour showing you exactly where to find your Organization UUID and sessionKey in your browser's DevTools.
-5. After the tour, click the brain icon in your menu bar → **Settings…** → paste both values → Save. (Lost the tour? It's also under Settings → Help → "Show welcome tour".)
+   - **Or**: right-click the app → **Open** → click **Open** in the dialog (one-time permission).
+4. Launch. The welcome tour pops up — follow it.
 
-That's it. Numbers should populate within 60s. Click the refresh icon in the dropdown to force.
+That's the whole setup. Numbers populate in the menu bar within ~60s of saving your credentials.
 
 ---
 
-## How to find your Organization UUID & sessionKey
+## How to find your Organization UUID & sessionKey (text version)
 
-If you want the gist without the tour:
+If you prefer text instructions to the in-app tour:
 
 Sign into <https://claude.ai>. Open DevTools (`⌥⌘I`).
 
@@ -61,7 +77,7 @@ mv ClaudeUsage.app /Applications/
 open /Applications/ClaudeUsage.app
 ```
 
-Then configure via Settings exactly like the download path above.
+Then configure via Settings (or wait for the welcome tour on first launch).
 
 ---
 
@@ -70,17 +86,12 @@ Then configure via Settings exactly like the download path above.
 - **Bundle ID**: change `PRODUCT_BUNDLE_IDENTIFIER` in `project.yml` *and* the matching `service` in `SessionStore.swift`. Defaults are `com.example.claudeusage`.
 - **Polling interval**: edit `pollingInterval` in `UsageViewModel.swift` (default: 60s).
 - **Notification thresholds**: edit `thresholds: [Int]` in `UsageViewModel.swift` (default: `[80, 95]`).
-- **Icon**: edit `make_icon.py` (Python + Pillow) and rebuild the icon:
-  ```bash
-  python3 make_icon.py icon_1024.png
-  mkdir -p AppIcon.iconset
-  for size in 16 32 64 128 256 512; do
-    sips -z $size $size icon_1024.png --out AppIcon.iconset/icon_${size}x${size}.png
-    sips -z $((size*2)) $((size*2)) icon_1024.png --out AppIcon.iconset/icon_${size}x${size}@2x.png
-  done
-  cp icon_1024.png AppIcon.iconset/icon_512x512@2x.png
-  iconutil -c icns AppIcon.iconset
-  ```
+- **Icon**: edit `make_icon.py` (Python + Pillow) and rebuild via the snippet in the [build script](build.sh).
+- **Re-render the tour screenshots**: run `ClaudeUsage.app/Contents/MacOS/ClaudeUsage --capture-onboarding=docs/onboarding/`. This uses SwiftUI's `ImageRenderer` to render each page directly to PNG — no system permissions required.
+
+## Leak check
+
+Before pushing, run `./scripts/check-leaks.sh` to scan source + (optionally) the built binary for personal data. See [scripts/.leak-patterns.example](scripts/.leak-patterns.example) for the template. A GitHub Actions workflow runs the same check on every push.
 
 ## Project layout
 
@@ -90,12 +101,16 @@ ClaudeUsage/
 ├── build.sh                   # one-shot build script
 ├── make_icon.py               # icon generator (Python + Pillow)
 ├── AppIcon.icns               # bundled app icon
+├── scripts/check-leaks.sh     # pre-commit personal-data scanner
+├── docs/
+│   ├── icon.png               # icon preview for README
+│   └── onboarding/page{0..3}.png   # tour page renderings
 ├── ClaudeUsageApp.swift       # @main entry
-├── AppDelegate.swift          # first-launch onboarding trigger
-├── OnboardingView.swift       # 3-step welcome tour with native illustrations
+├── AppDelegate.swift          # first-launch onboarding + capture mode
+├── OnboardingView.swift       # 3-step welcome tour
 ├── MenuBarLabelView.swift     # the percentage shown in the menu bar
 ├── MenuBarContentView.swift   # dropdown content
-├── SettingsView.swift         # ⌘, settings window (org UUID, sessionKey, etc.)
+├── SettingsView.swift         # ⌘, settings window
 ├── UsageViewModel.swift       # polling, state, threshold notifications
 ├── UsageClient.swift          # claude.ai HTTP client + JSON decoder
 ├── UsageData.swift            # data models

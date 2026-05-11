@@ -1,0 +1,17 @@
+name: Leak check
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Make script executable
+        run: chmod +x scripts/check-leaks.sh
+      - name: Scan source for generic leak patterns (strict mode)
+        run: ./scripts/check-leaks.sh --strict
