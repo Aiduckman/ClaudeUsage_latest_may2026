@@ -4,7 +4,7 @@
 
 **Easy install with guide.** A macOS menu bar app that shows real-time [claude.ai](https://claude.ai) usage — the rolling 5-hour session window, the 7-day weekly window, and the Opus weekly window (if your plan has one).
 
-- Color-coded percentage right in the menu bar (blue under 70%, orange 70–90%, red above 90%)
+- **Color-coded percentage right in the menu bar** — default color under 70%, **orange** at 70–89%, **red** at 90%+
 - Notifications at 80% and 95% per window (with hysteresis so they don't spam)
 - Optional Launch at Login
 - `sessionKey` stored in the macOS Keychain — never on disk
@@ -104,7 +104,7 @@ ClaudeUsage/
 ├── ClaudeUsageApp.swift       # @main entry
 ├── AppDelegate.swift          # first-launch onboarding + capture mode
 ├── OnboardingView.swift       # 3-step welcome tour
-├── MenuBarLabelView.swift     # the percentage shown in the menu bar
+├── StatusBarController.swift  # AppKit NSStatusItem — colored menu bar title
 ├── MenuBarContentView.swift   # dropdown content
 ├── SettingsView.swift         # ⌘, settings window
 ├── UsageViewModel.swift       # polling, state, threshold notifications

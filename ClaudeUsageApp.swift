@@ -4,20 +4,11 @@ import SwiftUI
 struct ClaudeUsageApp: App {
     @NSApplicationDelegateAdaptor(AppDelegate.self) private var appDelegate
 
-    // Live data by default. Configure Org UUID and sessionKey via Settings (⌘,).
-    // The first-launch welcome tour walks new users through it.
-    @StateObject private var viewModel = UsageViewModel(useMock: false)
-
     var body: some Scene {
-        MenuBarExtra {
-            MenuBarContentView(viewModel: viewModel)
-        } label: {
-            MenuBarLabelView(viewModel: viewModel)
-        }
-        .menuBarExtraStyle(.window)
-
+        // The menu bar item is created in AppKit (StatusBarController) so we
+        // can colour the title reliably. Only the Settings scene lives here.
         Settings {
-            SettingsView(viewModel: viewModel)
+            SettingsView(viewModel: appDelegate.viewModel)
         }
     }
 }

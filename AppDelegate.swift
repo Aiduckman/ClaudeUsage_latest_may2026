@@ -1,9 +1,15 @@
 import SwiftUI
 import AppKit
 
+@MainActor
 final class AppDelegate: NSObject, NSApplicationDelegate {
     static let onboardingCompleteKey = "claudeusage.onboardingComplete"
 
+    /// Shared view model. Owned by the delegate so both the AppKit status bar
+    /// controller and the SwiftUI Settings scene can observe the same instance.
+    let viewModel = UsageViewModel(useMock: false)
+
+    private var statusBarController: StatusBarController?
     private var onboardingWindow: NSWindow?
 
     func applicationDidFinishLaunching(_ notification: Notification) {
@@ -15,6 +21,11 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
                 self.captureOnboarding(to: dir)
             }
             return
+        }
+
+        // Bring up the menu bar item (AppKit, not MenuBarExtra).
+        Task { @MainActor in
+            self.statusBarController = StatusBarController(viewModel: self.viewModel)
         }
 
         let done = UserDefaults.standard.bool(forKey: Self.onboardingCompleteKey)
@@ -63,7 +74,8 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         }
 
         // Optional debug/QA hook: launch directly to a specific page by
-        // setting the key, e.g. `defaults write com.example.claudeusage         // claudeusage.onboardingStartPage -int 2`.
+        // setting the key, e.g. `defaults write com.example.claudeusage \
+        // claudeusage.onboardingStartPage -int 2`.
         let startPage = UserDefaults.standard.integer(forKey: "claudeusage.onboardingStartPage")
         UserDefaults.standard.removeObject(forKey: "claudeusage.onboardingStartPage")
 
