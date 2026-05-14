@@ -90,10 +90,11 @@ final class StatusBarController: NSObject {
                              text: String,
                              color: NSColor,
                              bakedColor: Bool) -> NSImage {
-        let font = NSFont.menuBarFont(ofSize: 0)
+        let menuFont = NSFont.menuBarFont(ofSize: 0)
+        let font = NSFont.systemFont(ofSize: menuFont.pointSize, weight: .bold)
 
         // Build the symbol with palette color if we're baking it in.
-        var symbolConfig = NSImage.SymbolConfiguration(pointSize: 13, weight: .medium)
+        var symbolConfig = NSImage.SymbolConfiguration(pointSize: 13, weight: .bold)
         if bakedColor {
             symbolConfig = symbolConfig.applying(.init(paletteColors: [color]))
         }
